@@ -80,10 +80,11 @@ AGENT_REGISTRY: dict[str, BaseAgent] = {
     AgentType.OUTREACH.value: _outreach_agent,
     AgentType.CODING.value: _coding_agent,
     AgentType.RETRIEVAL.value: _retrieval_agent,
-    # Future agents added here:
-    # AgentType.PLANNING.value: PlanningAgent(),
-    # AgentType.QA.value: QAAgent(),
-    # AgentType.CONTENT.value: ContentAgent(),
+    # Fallback aliases — router may return these for ambiguous tasks
+    AgentType.GENERAL.value: _research_agent,       # "general" → research
+    "qa": _coding_agent,                             # "qa" → coding (code review)
+    "content": _outreach_agent,                      # "content" → outreach (writing)
+    "planning": _research_agent,                     # "planning" → research (analysis)
 }
 
 
