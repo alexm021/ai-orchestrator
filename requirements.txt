@@ -19,8 +19,9 @@ pydantic==2.12.5
 pydantic-settings==2.14.1
 python-dotenv==1.2.2
 
-# === Streaming ===
+# === Streaming + Static files ===
 sse-starlette==3.4.4
+aiofiles==24.1.0
 
 # === Rate Limiting ===
 slowapi==0.1.9

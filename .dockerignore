@@ -50,3 +50,5 @@ docker-compose.yml
 
 # Docs (not needed at runtime)
 README.md
+
+# static/ is intentionally NOT ignored — frontend UI is served from here

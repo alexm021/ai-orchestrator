@@ -3,11 +3,13 @@
 # =============================================================================
 
 import asyncio
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse, FileResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
@@ -213,10 +215,19 @@ app.include_router(memory.router, prefix="/api/v1", tags=["Memory"])
 
 
 # =============================================================================
-# ROOT
+# STATIC FILES + ROOT
 # =============================================================================
+
+# Serve the frontend UI from /static — mount after API routes so /api/v1/* wins
+_static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+if os.path.isdir(_static_dir):
+    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
+
 
 @app.get("/", include_in_schema=False)
 async def root():
-    """Redirect root to interactive API docs."""
+    """Serve the frontend UI, or redirect to /docs if static files are missing."""
+    index = os.path.join(_static_dir, "index.html")
+    if os.path.isfile(index):
+        return FileResponse(index)
     return RedirectResponse(url="/docs")
