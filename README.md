@@ -64,29 +64,29 @@ POST /api/v1/task
 
 ## Quickstart
 
-### 1. Clone and install
+### Option A — Docker (recommended)
 
 ```bash
-git clone https://github.com/your-username/ai-orchestrator
+git clone https://github.com/alexm021/ai-orchestrator
+cd ai-orchestrator
+cp .env.example .env          # Add your GEMINI_API_KEY
+docker-compose up --build
+```
+
+Open **http://localhost:8000/docs**. That's it — no Python install needed.
+
+```bash
+docker-compose down           # Stop
+docker-compose logs -f web    # Stream logs
+```
+
+### Option B — Local Python
+
+```bash
+git clone https://github.com/alexm021/ai-orchestrator
 cd ai-orchestrator
 pip install -r requirements.txt
-```
-
-### 2. Configure environment
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and add your API key:
-
-```env
-GEMINI_API_KEY=your_key_here   # https://aistudio.google.com/apikey
-```
-
-### 3. Start the server
-
-```bash
+cp .env.example .env          # Add your GEMINI_API_KEY
 python run_api.py
 ```
 

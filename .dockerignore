@@ -1,0 +1,52 @@
+# =============================================================================
+# .dockerignore -- Files excluded from Docker build context
+# Smaller context = faster builds
+# =============================================================================
+
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.py[cod]
+
+# Virtual environments (we build our own inside Docker)
+venv/
+.venv/
+env/
+
+# Local data (mounted as volume in docker-compose)
+data/
+
+# Environment files (passed via --env-file or -e flags)
+.env
+.env.local
+
+# Test files (not needed in production image)
+tests/
+
+# Logs
+*.log
+server.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker itself
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Docs (not needed at runtime)
+README.md

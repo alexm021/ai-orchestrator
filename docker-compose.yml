@@ -1,0 +1,62 @@
+# =============================================================================
+# docker-compose.yml -- Local development and production
+# =============================================================================
+#
+# Usage:
+#   docker-compose up --build        # Start (rebuild image)
+#   docker-compose up -d             # Start in background
+#   docker-compose down              # Stop
+#   docker-compose logs -f web       # Stream logs
+#
+# Then open: http://localhost:8000/docs
+# =============================================================================
+
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: ai-orchestrator
+    ports:
+      - "8000:8000"
+
+    # Load env vars from .env file (never committed to git)
+    env_file:
+      - .env
+
+    # Override specific vars for container environment
+    environment:
+      - APP_ENV=production
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+
+    # Persist ChromaDB data between container restarts
+    # Without this, vector memory is lost every time the container stops
+    volumes:
+      - chroma_data:/app/data/chromadb
+
+    # Restart automatically on crash (not on manual stop)
+    restart: unless-stopped
+
+    # Resource limits -- prevents the container from eating all memory
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
+
+    # Health check -- docker-compose ps will show "healthy" or "unhealthy"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Named volume -- data persists even after `docker-compose down`
+# Use `docker-compose down -v` to also delete the volume
+volumes:
+  chroma_data:
+    driver: local
