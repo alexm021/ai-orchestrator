@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 
 from api.auth import require_api_key
+from api.limiter import limiter
 from api.schemas import TaskRequest, TaskResponse, PerformanceInfo, RoutingInfo
 from orchestrator.graph import run_task
 from core.logger import get_logger
@@ -48,7 +49,8 @@ def _is_quota_error(result: dict) -> bool:
         500: {"description": "Internal server error"},
     },
 )
-async def create_task(request_body: TaskRequest, request: Request, _: None = Depends(require_api_key)):
+@limiter.limit("10/minute")
+async def create_task(request: Request, request_body: TaskRequest, _: None = Depends(require_api_key)):
     """
     Execute a task through the multi-agent orchestrator.
 

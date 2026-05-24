@@ -8,11 +8,14 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.exceptions import RequestValidationError
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from core.config import settings
 from core.logger import setup_logging, get_logger
 from api.routes import task, health, memory
 from api.middleware import RequestIDMiddleware, RequestLoggingMiddleware
+from api.limiter import limiter
 
 logger = get_logger("api.main")
 
@@ -90,6 +93,10 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
 )
+
+# Attach the rate limiter to the app so slowapi can track request counts
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 # =============================================================================

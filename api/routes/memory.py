@@ -11,8 +11,9 @@
 # - Admin: clear old memories when needed
 # =============================================================================
 
-from fastapi import APIRouter, Depends, Query, HTTPException, status
+from fastapi import APIRouter, Depends, Query, HTTPException, Request, status
 from api.auth import require_api_key
+from api.limiter import limiter
 from api.schemas import MemoriesResponse, MemoryRecord, MemorySearchRequest
 from core.memory import get_memory_manager
 from core.logger import get_logger
@@ -31,7 +32,9 @@ logger = get_logger("api.memory")
         "Useful for debugging, auditing, and understanding what the system has learned."
     ),
 )
+@limiter.limit("30/minute")
 async def list_memories(
+    request: Request,
     limit: int = Query(
         default=10,
         ge=1,
@@ -100,7 +103,8 @@ async def list_memories(
         "'outreach to Tesla' even with no shared keywords."
     ),
 )
-async def search_memories(request: MemorySearchRequest, _: None = Depends(require_api_key)) -> MemoriesResponse:
+@limiter.limit("20/minute")
+async def search_memories(request: Request, body: MemorySearchRequest, _: None = Depends(require_api_key)) -> MemoriesResponse:
     """
     Semantic similarity search over stored memories.
 
@@ -112,8 +116,8 @@ async def search_memories(request: MemorySearchRequest, _: None = Depends(requir
         total = memory.count()
 
         results = await memory.search(
-            query=request.query,
-            n_results=request.n_results,
+            query=body.query,
+            n_results=body.n_results,
         )
 
         memories = [
