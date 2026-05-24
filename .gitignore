@@ -1,0 +1,49 @@
+# =============================================================================
+# AI Multi-Agent Orchestrator — Git Ignore
+# =============================================================================
+
+# Environment variables — NEVER commit these
+.env
+*.env.local
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# ChromaDB persistent data (local vector store)
+data/
+
+# Pytest cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+server.log
+
+# Temp test files
+requirements_new.txt
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
