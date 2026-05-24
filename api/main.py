@@ -13,7 +13,7 @@ from slowapi.errors import RateLimitExceeded
 
 from core.config import settings
 from core.logger import setup_logging, get_logger
-from api.routes import task, health, memory
+from api.routes import task, health, memory, stream
 from api.middleware import RequestIDMiddleware, RequestLoggingMiddleware
 from api.limiter import limiter
 
@@ -207,6 +207,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
 # =============================================================================
 
 app.include_router(task.router,   prefix="/api/v1", tags=["Tasks"])
+app.include_router(stream.router, prefix="/api/v1", tags=["Tasks"])
 app.include_router(health.router, prefix="/api/v1", tags=["System"])
 app.include_router(memory.router, prefix="/api/v1", tags=["Memory"])
 
