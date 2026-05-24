@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     # These are required — the system cannot function without them
     gemini_api_key: str = Field(..., description="Google Gemini API key")
     groq_api_key: str = Field(default="", description="Groq API key (optional fallback)")
+    api_key: str = Field(default="", description="API key for endpoint auth (empty = auth disabled)")
 
     # -------------------------------------------------------------------------
     # Model Selection

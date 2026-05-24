@@ -11,7 +11,8 @@
 # - Admin: clear old memories when needed
 # =============================================================================
 
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Depends, Query, HTTPException, status
+from api.auth import require_api_key
 from api.schemas import MemoriesResponse, MemoryRecord, MemorySearchRequest
 from core.memory import get_memory_manager
 from core.logger import get_logger
@@ -37,6 +38,7 @@ async def list_memories(
         le=100,
         description="Maximum number of memories to return",
     ),
+    _: None = Depends(require_api_key),
 ) -> MemoriesResponse:
     """
     List recent memories from ChromaDB.
@@ -98,7 +100,7 @@ async def list_memories(
         "'outreach to Tesla' even with no shared keywords."
     ),
 )
-async def search_memories(request: MemorySearchRequest) -> MemoriesResponse:
+async def search_memories(request: MemorySearchRequest, _: None = Depends(require_api_key)) -> MemoriesResponse:
     """
     Semantic similarity search over stored memories.
 

@@ -279,6 +279,71 @@ async def test_validation_error_has_request_id(client) -> bool:
 
 
 # =============================================================================
+# TEST 10 -- AUTH: NO KEY RETURNS 401 WHEN API_KEY IS SET
+# =============================================================================
+
+async def test_auth_no_key(client) -> bool:
+    """When API_KEY is configured, requests without X-API-Key get 401."""
+    import os
+    from unittest.mock import patch
+
+    # Temporarily set an API key in settings
+    with patch.object(__import__('core.config', fromlist=['settings']).settings, 'api_key', 'test-secret-key'):
+        response = await client.post(
+            "/api/v1/task",
+            json={"message": "Hello", "priority": "medium"},
+        )
+
+    passed = response.status_code == 401
+    data = response.json()
+
+    print_result(
+        "POST /task without key returns 401 when auth enabled",
+        passed,
+        f"HTTP {response.status_code} | error={data.get('detail', {}).get('error') if isinstance(data.get('detail'), dict) else data.get('error')}",
+    )
+    return passed
+
+
+async def test_auth_wrong_key(client) -> bool:
+    """Wrong API key returns 401."""
+    from unittest.mock import patch
+
+    with patch.object(__import__('core.config', fromlist=['settings']).settings, 'api_key', 'test-secret-key'):
+        response = await client.post(
+            "/api/v1/task",
+            json={"message": "Hello", "priority": "medium"},
+            headers={"X-API-Key": "wrong-key"},
+        )
+
+    passed = response.status_code == 401
+
+    print_result(
+        "POST /task with wrong key returns 401",
+        passed,
+        f"HTTP {response.status_code}",
+    )
+    return passed
+
+
+async def test_auth_health_public(client) -> bool:
+    """Health endpoint is always public — no API key needed."""
+    from unittest.mock import patch
+
+    with patch.object(__import__('core.config', fromlist=['settings']).settings, 'api_key', 'test-secret-key'):
+        response = await client.get("/api/v1/health")
+
+    passed = response.status_code == 200
+
+    print_result(
+        "GET /health is public (no key required)",
+        passed,
+        f"HTTP {response.status_code}",
+    )
+    return passed
+
+
+# =============================================================================
 # MAIN
 # =============================================================================
 
@@ -330,6 +395,15 @@ async def run_all_tests():
 
         print("\n[ TEST 9 -- REQUEST ID IN ERROR BODY ]")
         results.append(await test_validation_error_has_request_id(client))
+
+        print("\n[ TEST 10 -- AUTH: NO KEY -> 401 ]")
+        results.append(await test_auth_no_key(client))
+
+        print("\n[ TEST 11 -- AUTH: WRONG KEY -> 401 ]")
+        results.append(await test_auth_wrong_key(client))
+
+        print("\n[ TEST 12 -- AUTH: HEALTH IS PUBLIC ]")
+        results.append(await test_auth_health_public(client))
 
     passed_count = sum(results)
     total = len(results)
